@@ -9,11 +9,18 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Test">
-        <activity android:name=".ViewPatientActivity"></activity>
-        <activity android:name=".AddPatientActivity"
-            android:label="Add Patient"
+        <activity android:name=".MainpageActivity"
+            android:label="Maendeleo Hospital"
             android:parentActivityName=".HomeActivity">
-            <!---the .activityname is just syntax -->
+
+        </activity>
+        <activity android:name=".ViewPatientActivity" />
+        <activity
+            android:name=".AddPatientActivity"
+            android:label="Add Patient"
+            android:parentActivityName=".MainpageActivity">
+
+            <!-- -the .activityname is just syntax -->
 
         </activity>
         <activity
@@ -23,8 +30,9 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
         </activity>
-        <activity android:name=".MainActivity"></activity>
+        <activity android:name=".MainActivity" />
     </application>
 
 </manifest>

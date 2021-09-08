@@ -37,7 +37,7 @@ public class HomeActivity extends AppCompatActivity {
                     edtx_password.setError("Password is required");
                 }else {
                     Toast.makeText(HomeActivity.this, "Login successful", Toast.LENGTH_SHORT).show();
-                    Intent intentlogin = new Intent(HomeActivity.this, AddPatientActivity.class);
+                    Intent intentlogin = new Intent(HomeActivity.this, MainpageActivity.class);
                     startActivity(intentlogin);
                 }
             }

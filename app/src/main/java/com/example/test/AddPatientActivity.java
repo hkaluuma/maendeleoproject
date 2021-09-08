@@ -109,7 +109,7 @@ public class AddPatientActivity extends AppCompatActivity {
                     //Toast.makeText(AddPatientActivity.this, "Submission successful", Toast.LENGTH_SHORT).show();
                     Toast.makeText(getApplicationContext(), "Submission succesful", Toast.LENGTH_SHORT).show();
                     //navigate between two activities
-                    Intent intentregister = new Intent(AddPatientActivity.this,HomeActivity.class);
+                    Intent intentregister = new Intent(AddPatientActivity.this, MainpageActivity.class);
                     startActivity(intentregister);
                 }
 
