@@ -2,7 +2,12 @@ package com.example.test;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Layout;
 import android.view.View;
@@ -24,11 +29,11 @@ public class AddPatientActivity extends AppCompatActivity {
         setContentView(R.layout.activity_addpatient);
 
         //make reference to the xml for the spinner
-        Spinner spinnerd =  findViewById(R.id.spinner_disease);
-        Spinner spinnercity =  findViewById(R.id.spinner_city);
+        Spinner spinnerd = findViewById(R.id.spinner_disease);
+        Spinner spinnercity = findViewById(R.id.spinner_city);
         //assigning data source
-        String[] disease_array = {"nothing selected","Malaria","COVID19","Yellow Fever","HepatitisB"};
-        String[] city_array = {"nothing selected","Nairobi","Dodoma","Kampala","Kigali","Juba"};
+        String[] disease_array = {"nothing selected", "Malaria", "COVID19", "Yellow Fever", "HepatitisB"};
+        String[] city_array = {"nothing selected", "Nairobi", "Dodoma", "Kampala", "Kigali", "Juba"};
 
         //desinged a spinner item design
         //configure An array adapter
@@ -50,7 +55,7 @@ public class AddPatientActivity extends AppCompatActivity {
         });
 
         //configure our arrayadapter for spinner city
-        ArrayAdapter<String> city_adapter =  new ArrayAdapter<String>(AddPatientActivity.this,R.layout.spinner_item_design,R.id.spinner_txv, city_array);
+        ArrayAdapter<String> city_adapter = new ArrayAdapter<String>(AddPatientActivity.this, R.layout.spinner_item_design, R.id.spinner_txv, city_array);
         spinnercity.setAdapter(city_adapter);
 
         spinnercity.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -92,38 +97,97 @@ public class AddPatientActivity extends AppCompatActivity {
                 // check if empty
                 if (patientnames.isEmpty()) {
                     edx_names.setError("Patient names are required");
-                }else if(password.isEmpty()){
+                } else if (password.isEmpty()) {
                     edx_password.setError("Password is required");
-                }else if(age.isEmpty()){
+                } else if (age.isEmpty()) {
                     edx_age.setError("Patient age is required");
-                }else if(contacts.isEmpty()){
+                } else if (contacts.isEmpty()) {
                     edx_contact.setError("Phonenumber is required");
-                }else if(email.isEmpty()){
+                } else if (email.isEmpty()) {
                     edx_email.setError("Email is required");
-                }else if(selected_disease.equals("nothing selected")){
+                } else if (selected_disease.equals("nothing selected")) {
                     Toast.makeText(AddPatientActivity.this, "No disease selected", Toast.LENGTH_SHORT).show();
-                }else if(selected_city.equals("nothing selected")){
+                } else if (selected_city.equals("nothing selected")) {
                     Toast.makeText(AddPatientActivity.this, "No city selected", Toast.LENGTH_SHORT).show();
-                }else{
-                    //happens here
-                    //Toast.makeText(AddPatientActivity.this, "Submission successful", Toast.LENGTH_SHORT).show();
-                    Toast.makeText(getApplicationContext(), "Submission succesful", Toast.LENGTH_SHORT).show();
-                    //navigate between two activities
-                    Intent intentregister = new Intent(AddPatientActivity.this, MainpageActivity.class);
-                    startActivity(intentregister);
+                } else {
+
+                    boolean checkconnection = haveNetworkConectivity();
+                    if(checkconnection){
+                        Toast.makeText(AddPatientActivity.this, "You are connected to network", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "Submission succesful", Toast.LENGTH_SHORT).show();
+                        //navigate between two activities
+                        Intent intentregister = new Intent(AddPatientActivity.this, MainpageActivity.class);
+                        startActivity(intentregister);
+                    }else{
+                        Toast.makeText(AddPatientActivity.this, "Network not connected, Check your connection", Toast.LENGTH_SHORT).show();
+                    }
+
                 }
-
-
-
 
 
             }
         });
 
 
+    }//end of oncreate method
 
+    //async task
+    class Submitpatient extends AsyncTask<String, String, String>{
+        ProgressDialog pdialog;
+        String responsefromphp;
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            //display message to the user
+            pdialog.setMessage("Please wait ....");
+            //user can't cancel the dialog
+            pdialog.setCancelable(false);
+            //we don't know how long it takes to submit
+            pdialog.setIndeterminate(false);
+            //show the dialog
+            pdialog.show();
+        }
 
+        @Override
+        protected String doInBackground(String... strings) {
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+            //dismisses dialog
+            pdialog.dismiss();
+            if(responsefromphp.equals("1")){
+
+            }else if(responsefromphp.equals("0")){
+                Toast.makeText(AddPatientActivity.this, "Failed response from php", Toast.LENGTH_SHORT).show();
+            }else{
+                Toast.makeText(AddPatientActivity.this, "Technical error, contact admin", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     //functions here
+    //method to check internet availability(WiFi and MobileData)
+    private boolean haveNetworkConectivity() {
+        boolean haveConnectedWi;
+        haveConnectedWi = false;
+        boolean haveConnectedMobile = false;
+
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo[] netInfo = cm.getAllNetworkInfo();
+        for (NetworkInfo ni : netInfo) {
+            if (ni.getTypeName().equalsIgnoreCase("WIFI"))
+                if (ni.isConnected())
+                    haveConnectedWi = true;
+            if (ni.getTypeName().equalsIgnoreCase("MOBILE"))
+                if (ni.isConnected())
+                    haveConnectedMobile = true;
+        }
+        return haveConnectedWi || haveConnectedMobile;
+    }
+
 }
+
+
