@@ -18,10 +18,23 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+
 public class AddPatientActivity extends AppCompatActivity {
     //our global variables
     String selected_disease, selected_city, patientnames, age, contacts, password, email, comments;
     Button buttonsubmit;
+    String addpatient_url = "http://192.168.1.160/maendeleo/addpatient.php";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +44,10 @@ public class AddPatientActivity extends AppCompatActivity {
         //make reference to the xml for the spinner
         Spinner spinnerd = findViewById(R.id.spinner_disease);
         Spinner spinnercity = findViewById(R.id.spinner_city);
+
+        //to capture comments
+        EditText edt_comments = findViewById(R.id.edtx_othercommments);
+        comments = edt_comments.getText().toString();
         //assigning data source
         String[] disease_array = {"nothing selected", "Malaria", "COVID19", "Yellow Fever", "HepatitisB"};
         String[] city_array = {"nothing selected", "Nairobi", "Dodoma", "Kampala", "Kigali", "Juba"};
@@ -85,6 +102,7 @@ public class AddPatientActivity extends AppCompatActivity {
                 EditText edx_password = findViewById(R.id.editext_pasword);
 
 
+
                 //assigning the textfield objetcts to the global variables
                 patientnames = edx_names.getText().toString();
                 //patientnames = edx_names.getText().toString();
@@ -113,11 +131,9 @@ public class AddPatientActivity extends AppCompatActivity {
 
                     boolean checkconnection = haveNetworkConectivity();
                     if(checkconnection){
-                        Toast.makeText(AddPatientActivity.this, "You are connected to network", Toast.LENGTH_SHORT).show();
-                        Toast.makeText(getApplicationContext(), "Submission succesful", Toast.LENGTH_SHORT).show();
-                        //navigate between two activities
-                        Intent intentregister = new Intent(AddPatientActivity.this, MainpageActivity.class);
-                        startActivity(intentregister);
+                        Submitpatient asyncobj = new Submitpatient();
+                        asyncobj.execute();
+
                     }else{
                         Toast.makeText(AddPatientActivity.this, "Network not connected, Check your connection", Toast.LENGTH_SHORT).show();
                     }
@@ -137,6 +153,7 @@ public class AddPatientActivity extends AppCompatActivity {
         String responsefromphp;
         @Override
         protected void onPreExecute() {
+            pdialog = new ProgressDialog(AddPatientActivity.this);
             super.onPreExecute();
             //display message to the user
             pdialog.setMessage("Please wait ....");
@@ -150,7 +167,50 @@ public class AddPatientActivity extends AppCompatActivity {
 
         @Override
         protected String doInBackground(String... strings) {
-            return null;
+            //new codes
+            try {
+
+                DefaultHttpClient httpclient = new DefaultHttpClient();
+
+                HttpPost httppost = new HttpPost(addpatient_url);
+                //https://hc.apache.org/httpcomponents-client-4.5.x/current/httpclient/apidocs/org/apache/http/client/methods/HttpPost.html
+
+                ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(3);
+
+                nameValuePairs.add(new BasicNameValuePair("cap_disease", selected_disease));
+                nameValuePairs.add(new BasicNameValuePair("cap_fullname", patientnames));
+                nameValuePairs.add(new BasicNameValuePair("cap_password", password));
+                nameValuePairs.add(new BasicNameValuePair("cap_age", age));
+                nameValuePairs.add(new BasicNameValuePair("cap_contact", contacts));
+                nameValuePairs.add(new BasicNameValuePair("cap_email", email));
+                nameValuePairs.add(new BasicNameValuePair("cap_city", selected_city));
+                nameValuePairs.add(new BasicNameValuePair("cap_comments", comments));
+
+                httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+                HttpResponse response = httpclient.execute(httppost);
+                //used to read data from an input like file (https://www.w3spoint.com/input-output-tutorial-java)
+                InputStream inputStream = response.getEntity().getContent();
+
+                BufferedReader rd = new BufferedReader(new InputStreamReader(inputStream), 4096);
+                //bufferedreader (https://www.javatpoint.com/java-bufferedreader-class)
+                //Java BufferedReader class is used to read the text from a character-based input stream. It can be used to read data line by line by readLine() method.
+                //buffered reader takes parameters of the reader and input buffer size int
+                String line;
+
+                StringBuilder sb = new StringBuilder();
+                //StringBuilder is a mutable sequence of characters. StringBuilder is used when we want to modify Java strings in-place(https://zetcode.com/java/stringbuilder/)
+                while ((line = rd.readLine()) != null) {
+                    sb.append(line);
+                }
+                rd.close();
+                responsefromphp = sb.toString();
+                inputStream.close();
+
+            } catch (Exception e) {
+                Toast.makeText(getApplicationContext(), "Try Again, Unexpected Error on method doing in background", Toast.LENGTH_LONG).show();
+            }
+
+            return responsefromphp;
         }
 
         @Override
@@ -159,7 +219,11 @@ public class AddPatientActivity extends AppCompatActivity {
             //dismisses dialog
             pdialog.dismiss();
             if(responsefromphp.equals("1")){
-
+                //Toast.makeText(AddPatientActivity.this, "You are connected to network", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Submission succesful", Toast.LENGTH_SHORT).show();
+                //navigate between two activities
+                Intent intentregister = new Intent(AddPatientActivity.this, MainpageActivity.class);
+                startActivity(intentregister);
             }else if(responsefromphp.equals("0")){
                 Toast.makeText(AddPatientActivity.this, "Failed response from php", Toast.LENGTH_SHORT).show();
             }else{

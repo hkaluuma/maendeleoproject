@@ -7,13 +7,17 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="@color/teal_200">
 
 
         <ListView
             android:id="@+id/viewpatients"
+            android:dividerHeight="2dp"
+            android:divider="@color/teal_200"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:background="@color/white"/>
 
     </LinearLayout>
 

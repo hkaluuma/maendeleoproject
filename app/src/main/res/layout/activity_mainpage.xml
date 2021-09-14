@@ -42,10 +42,11 @@
                 android:layout_weight="0.2"/>
 
             <ImageView
+                android:id="@+id/viewpatientsimg"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:src="@drawable/ic_viewpatient"
-                android:layout_weight="1"/>
+                android:layout_weight="1"
+                android:src="@drawable/ic_viewpatient" />
 
         </LinearLayout>
 
